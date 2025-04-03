@@ -9,11 +9,15 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "@types/matter-js": "^0.19.8",
+    "matter-js": "^0.20.0",
     "vue": "^3.5.13"
   },
   "devDependencies": {
     "@eslint/js": "^9.23.0",
+    "@types/node": "^22.14.0",
     "@vitejs/plugin-vue": "^5.2.1",
+    "@vue/runtime-core": "^3.5.13",
     "@vue/tsconfig": "^0.7.0",
     "eslint": "^9.23.0",
     "eslint-plugin-vue": "^10.0.0",
