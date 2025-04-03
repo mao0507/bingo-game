@@ -1,0 +1,19 @@
+* text=auto
+
+*.html text eol=lf
+*.mjs text eol=lf
+*.cjs text eol=lf
+*.js text eol=lf
+*.mts text eol=lf
+*.ts text eol=lf
+*.json text eol=lf
+*.jsx text eol=lf
+*.tsx text eol=lf
+*.vue text eol=lf
+src/**/*.css text eol=lf
+src/**/*.less text eol=lf
+src/**/*.sass text eol=lf
+src/**/*.scss text eol=lf
+*.png binary
+*.jpg binary
+*.properties merge=ours
