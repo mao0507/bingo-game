@@ -6,6 +6,7 @@ export class BingoGame {
   private engine: Engine | null = null;
   private state: GameState;
   private message: GameMessage;
+  private runner: Runner | null = null;
 
   constructor() {
     this.state = reactive({
@@ -28,16 +29,27 @@ export class BingoGame {
   }
 
   public initPhysics(container: HTMLElement): void {
-    // 清除現有的球
+    // 清除現有的球和停止舊引擎
     if (this.engine) {
       this.clearBalls();
+
+      // 停止舊的運行器
+      if (this.runner) {
+        Runner.stop(this.runner);
+        this.runner = null;
+      }
+
+      // 清理現有引擎的世界和事件
+      Events.off(this.engine, 'afterUpdate');
+      World.clear(this.engine.world, false);
+      Engine.clear(this.engine);
     }
 
     const containerRect = container.getBoundingClientRect();
 
     // 初始化物理引擎 - 適當調整重力
     this.engine = Engine.create({
-      gravity: { x: 0, y: 0.5 }, // 降低重力，讓球更慢下落
+      gravity: { x: 0, y: 0.98 }, // 增加重力，使球體能明顯下落
     });
 
     // 創建邊界牆壁
@@ -64,8 +76,14 @@ export class BingoGame {
 
     World.add(this.engine.world, walls);
 
-    // 開始運行物理引擎
-    Runner.run(this.engine);
+    // 開始運行物理引擎，設置高更新率
+    this.runner = Runner.run(
+      Runner.create({
+        isFixed: true,
+        delta: 1000 / 60, // 確保每秒60幀的更新速率
+      }),
+      this.engine,
+    );
 
     // 全局位置更新事件
     Events.on(this.engine, 'afterUpdate', () => {
@@ -107,6 +125,11 @@ export class BingoGame {
   }
 
   private createBall(number: number, container: HTMLElement): Body {
+    if (!this.engine || !this.engine.world) {
+      console.error('物理引擎未初始化！');
+      throw new Error('物理引擎未初始化');
+    }
+
     const containerRect = container.getBoundingClientRect();
 
     // 創建DOM元素
@@ -178,16 +201,22 @@ export class BingoGame {
 
     // 創建物理球
     const ball = Bodies.circle(x, y, radius, {
-      label: 'ball',
+      label: 'ball-' + number, // 添加唯一標籤
       restitution: randomRestitution,
-      friction: 0.001,
+      friction: 0.05, // 稍微增加摩擦力
       density: randomDensity,
-      frictionAir: 0.0005,
+      frictionAir: 0.001, // 降低空氣阻力
+      slop: 0.05, // 增加碰撞容許誤差
+      isStatic: false, // 確保不是靜態物體
     });
 
     // 添加到物理世界
-    World.add(this.engine!.world, ball);
+    World.add(this.engine.world, ball);
     this.state.balls.set(ball, ballElement);
+
+    // 立即觸發一次位置更新
+    ballElement.style.left = `${ball.position.x}px`;
+    ballElement.style.top = `${ball.position.y}px`;
 
     return ball;
   }
@@ -206,6 +235,10 @@ export class BingoGame {
       }
       return null;
     }
+
+    // 確保容器位置是最新的
+    const containerRect = container.getBoundingClientRect();
+    console.log('球容器當前尺寸:', containerRect.width, containerRect.height);
 
     // 一次開出3-5顆球
     const ballsToDrawCount = Math.floor(Math.random() * 3) + 3;
@@ -237,7 +270,7 @@ export class BingoGame {
         // 給予隨機初始速度
         Body.setVelocity(ball, {
           x: (Math.random() - 0.5) * 2, // 較小的水平速度
-          y: Math.random() * 0.5, // 較小的初始向下速度
+          y: Math.random() * 2 + 1, // 增加向下的初始速度
         });
 
         // 較小的角速度
@@ -261,8 +294,12 @@ export class BingoGame {
     this.state.winningLines = 0;
     this.state.gameEndMessageShown = false;
     this.state.drawnNumbers.clear();
-    this.clearBalls();
+
+    // 重新初始化物理引擎
     this.initPhysics(container);
+
+    // 確保容器在正確的位置
+    console.log('遊戲容器狀態:', container.getBoundingClientRect());
 
     const interval = setInterval(() => {
       const number = this.drawNumber(container);
@@ -279,11 +316,19 @@ export class BingoGame {
   }
 
   private clearBalls(): void {
-    this.state.balls.forEach((element, body) => {
-      World.remove(this.engine!.world, body);
-      element.remove();
-    });
-    this.state.balls.clear();
+    if (this.engine && this.engine.world) {
+      this.state.balls.forEach((element, body) => {
+        // 確保球體還在物理世界中
+        if (body && this.engine && this.engine.world.bodies.includes(body)) {
+          World.remove(this.engine.world, body);
+        }
+        // 確保元素還在 DOM 中
+        if (element && element.parentNode) {
+          element.remove();
+        }
+      });
+      this.state.balls.clear();
+    }
   }
 
   private checkWin(): number {
