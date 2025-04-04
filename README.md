@@ -1,5 +1,23 @@
-# Vue 3 + TypeScript + Vite
+# Bingo Game
 
-This template should help get you started developing with Vue 3 and TypeScript in Vite. The template uses Vue 3 `<script setup>` SFCs, check out the [script setup docs](https://v3.vuejs.org/api/sfc-script-setup.html#sfc-script-setup) to learn more.
+## 專案說明
 
-Learn more about the recommended Project Setup and IDE Support in the [Vue Docs TypeScript Guide](https://vuejs.org/guide/typescript/overview.html#project-setup).
+這是一個使用 Vue 3 + TypeScript 開發的賓果遊戲專案。
+
+### 使用技術
+
+- **前端框架**: Vue 3
+- **開發語言**: TypeScript
+- **建構工具**: Vite
+- **物理引擎**: Matter.js
+- **狀態管理**: Vue Reactive
+
+### 主要功能
+
+- 5x5 賓果遊戲盤面
+- 物理引擎實現的球體掉落效果
+- 可選擇 30/40/50 顆球進行遊戲
+- 即時檢查連線並顯示獲勝訊息
+- 支援更換盤面功能
+
+### 專案結構
