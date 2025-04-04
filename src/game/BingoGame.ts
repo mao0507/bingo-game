@@ -8,6 +8,9 @@ export class BingoGame {
   private message: GameMessage;
   private runner: Runner | null = null;
 
+  /**
+   * 初始化賓果遊戲
+   */
   constructor() {
     this.state = reactive({
       board: [],
@@ -28,6 +31,11 @@ export class BingoGame {
     this.init();
   }
 
+  /**
+   * 初始化物理引擎及相關設置
+   * @param {HTMLElement} container - 容器元素，用於放置球體和計算物理邊界
+   * @returns {void}
+   */
   public initPhysics(container: HTMLElement): void {
     // 清除現有的球和停止舊引擎
     if (this.engine) {
@@ -105,10 +113,18 @@ export class BingoGame {
     console.log('容器尺寸:', containerRect.width, containerRect.height);
   }
 
+  /**
+   * 初始化遊戲並設置事件監聽器
+   * @returns {void}
+   */
   private init(): void {
     this.setupEventListeners();
   }
 
+  /**
+   * 創建新的遊戲板，生成隨機數字
+   * @returns {void}
+   */
   public createBoard(): void {
     const numbers = Array.from({ length: 70 }, (_, i) => i + 1);
     this.state.board = [];
@@ -120,10 +136,20 @@ export class BingoGame {
     }
   }
 
+  /**
+   * 設置遊戲相關的事件監聽器
+   * @returns {void}
+   */
   private setupEventListeners(): void {
     // 事件監聽器將在 Vue 組件中設置
   }
 
+  /**
+   * 創建一個新的球體並添加到物理世界
+   * @param {number} number - 球體上顯示的數字
+   * @param {HTMLElement} container - 放置球體的容器元素
+   * @returns {Body} - 創建的物理球體對象
+   */
   private createBall(number: number, container: HTMLElement): Body {
     if (!this.engine || !this.engine.world) {
       console.error('物理引擎未初始化！');
@@ -221,6 +247,11 @@ export class BingoGame {
     return ball;
   }
 
+  /**
+   * 抽取新的數字並創建相應的球體
+   * @param {HTMLElement} container - 放置球體的容器元素
+   * @returns {boolean | null} - 是否成功抽取數字，null 表示遊戲結束或無法抽取
+   */
   public drawNumber(container: HTMLElement): boolean | null {
     if (this.state.drawnNumbers.size >= this.state.maxBalls) {
       const lines = this.checkWin();
@@ -290,6 +321,11 @@ export class BingoGame {
     return true;
   }
 
+  /**
+   * 開始遊戲，初始化相關設置並開始自動抽取數字
+   * @param {HTMLElement} container - 放置球體的容器元素
+   * @returns {void}
+   */
   public startGame(container: HTMLElement): void {
     this.state.winningLines = 0;
     this.state.gameEndMessageShown = false;
@@ -309,12 +345,20 @@ export class BingoGame {
     }, 1500);
   }
 
+  /**
+   * 更換遊戲板，生成新的隨機數字
+   * @returns {void}
+   */
   public changeBoard(): void {
     this.state.drawnNumbers.clear();
     this.clearBalls();
     this.createBoard();
   }
 
+  /**
+   * 清除所有球體，從物理世界和 DOM 中移除
+   * @returns {void}
+   */
   private clearBalls(): void {
     if (this.engine && this.engine.world) {
       this.state.balls.forEach((element, body) => {
@@ -331,6 +375,10 @@ export class BingoGame {
     }
   }
 
+  /**
+   * 檢查遊戲勝利情況，計算連線數量
+   * @returns {number} - 當前連線數量
+   */
   private checkWin(): number {
     const size = 5;
     let lines = 0;
@@ -376,6 +424,12 @@ export class BingoGame {
     return lines;
   }
 
+  /**
+   * 顯示遊戲消息
+   * @param {string} text - 消息文字內容
+   * @param {boolean} isWin - 是否為獲勝消息
+   * @returns {void}
+   */
   public showMessage(text: string, isWin: boolean): void {
     this.message.text = text;
     this.message.isWin = isWin;
@@ -386,14 +440,27 @@ export class BingoGame {
     }, 3000);
   }
 
+  /**
+   * 獲取遊戲狀態
+   * @returns {GameState} - 當前遊戲狀態
+   */
   public getState(): GameState {
     return this.state;
   }
 
+  /**
+   * 獲取遊戲消息
+   * @returns {GameMessage} - 當前遊戲消息
+   */
   public getMessage(): GameMessage {
     return this.message;
   }
 
+  /**
+   * 設置最大球數
+   * @param {number} count - 最大球數量
+   * @returns {void}
+   */
   public setMaxBalls(count: number): void {
     this.state.maxBalls = count;
   }
